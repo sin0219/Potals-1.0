@@ -1,6 +1,7 @@
 import flet as ft
 import datetime
 import urllib.parse
+import os
 
 from views.top_view import top_view
 from views.account.account_create_view import account_create_view
@@ -87,4 +88,8 @@ def main(page: ft.Page):
     page.on_route_change = route_change
     page.go(page.route)
 
-ft.app(target=main)
+# Renderが渡してくるPORTを使う（無ければ8080）
+port = int(os.environ.get("PORT", 8080))
+
+# 重要：host="0.0.0.0" にして外部からアクセス可能にする
+ft.app(target=main, view=ft.WEB_BROWSER, port=port, host="0.0.0.0")
