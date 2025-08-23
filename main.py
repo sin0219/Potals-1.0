@@ -87,4 +87,4 @@ def main(page: ft.Page):
     page.on_route_change = route_change
     page.go(page.route)
 
-ft.flet_app(target=main)
+ft.app(target=main)
