@@ -58,6 +58,66 @@ def show_admin_login_dialog(page: ft.Page):
     page.dialog = dlg_modal
     page.open(dlg_modal)
 
+def show_mypage_login_dialog(page: ft.Page):
+    """マイページ用ログインダイアログ"""
+    user_id = ft.TextField(label="ID", width=250)
+    password = ft.TextField(label="Password", password=True, can_reveal_password=True, width=250)
+    error_text = ft.Text("", color="red")
+
+    async def on_login(e):
+        uid = user_id.value.strip()
+        pwd = password.value.strip()
+        if not uid or not pwd:
+            error_text.value = "IDとパスワードを入力してください"
+            page.update()
+            return
+
+        conn = None
+        try:
+            conn = sqlite3.connect("data/portal.db")
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT name FROM accounts WHERE user_id=? AND password=?",
+                (uid, pwd)
+            )
+            res = cursor.fetchone()
+        except Exception as ex:
+            error_text.value = f"DBエラー: {ex}"
+            page.update()
+            return
+        finally:
+            if conn:
+                conn.close()
+
+        if res:
+            # ログイン成功 - ユーザー名を保存
+            # 修正前: page.client_storage.set("mypage_user_name", res[0])
+            # 修正後:
+            page.session.set("mypage_user_name", res[0])
+            page.close(dlg_modal)
+            await asyncio.sleep(0.1)
+            page.go("/mypage")
+        else:
+            error_text.value = "認証に失敗しました"
+            page.update()
+
+    def close_dialog(e):
+        page.close(dlg_modal)
+
+    dlg_modal = ft.AlertDialog(
+        modal=True,
+        title=ft.Text("マイページログイン"),
+        content=ft.Column([user_id, password, error_text], tight=True),
+        actions=[
+            ft.TextButton("ログイン", on_click=on_login),
+            ft.TextButton("キャンセル", on_click=close_dialog),
+        ],
+        actions_alignment=ft.MainAxisAlignment.END,
+    )
+
+    page.dialog = dlg_modal
+    page.open(dlg_modal)
+
 def top_view(page: ft.Page):
     page.title = "PORTALs"
     page.scroll = "auto"
@@ -161,7 +221,7 @@ def top_view(page: ft.Page):
         ),
         create_menu_card(
             "person", "マイページ", "個人設定と\nプロフィール管理", "#8b5cf6",
-            lambda e: None
+            lambda e: show_mypage_login_dialog(page)
         ),
     ], alignment="center", spacing=20, wrap=True)
 

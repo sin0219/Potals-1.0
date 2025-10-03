@@ -1,7 +1,7 @@
 import flet as ft
 import datetime
 import urllib.parse
-import os
+import os  # ← これが必要
 
 from views.top_view import top_view
 from views.account.account_create_view import account_create_view
@@ -22,9 +22,9 @@ from views.daily.daily_create_view import daily_create_view
 from views.daily.daily_detail_view import daily_detail_view
 from views.daily.daily_edit_view import daily_edit_view
 from views.search.search_result_view import search_result_view
-from views.search.search_handover_view import search_handover_view # Import new view
-from views.search.search_daily_view import search_daily_view # Import new view
-
+from views.search.search_handover_view import search_handover_view
+from views.search.search_daily_view import search_daily_view
+from views.mypage.mypage_view import mypage_view
 import db
 
 def main(page: ft.Page):
@@ -76,10 +76,12 @@ def main(page: ft.Page):
             page.views.append(ft.View(page.route, [daily_detail_view(page)]))
         elif page.route.startswith("/daily/edit"):
             page.views.append(ft.View(page.route, [daily_edit_view(page)]))
-        elif page.route.startswith("/search_daily"): # Added route for search_daily_view
+        elif page.route.startswith("/search_daily"):
             page.views.append(ft.View(page.route, [search_daily_view(page)]))
-        elif page.route.startswith("/search_handover"): # Added route for search_handover_view
+        elif page.route.startswith("/search_handover"):
             page.views.append(ft.View(page.route, [search_handover_view(page)]))
+        elif page.route == "/mypage":  # ← この3行を追加
+            page.views.append(ft.View("/mypage", [mypage_view(page)]))   
         elif page.route.startswith("/search"):
             page.views.append(ft.View(page.route, [search_result_view(page)]))
 
