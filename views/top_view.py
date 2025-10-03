@@ -58,17 +58,59 @@ def show_admin_login_dialog(page: ft.Page):
     page.dialog = dlg_modal
     page.open(dlg_modal)
 
-
 def top_view(page: ft.Page):
     page.title = "PORTALs"
     page.scroll = "auto"
-    page.padding = 30
+    page.padding = 20
+    page.bgcolor = "#f8fafc"
 
-    title = ft.Text("PORTALs", size=36, weight="bold", text_align="center")
+    # ヘッダー部分（ロゴ画像使用）
+    header = ft.Container(
+        content=ft.Column([
+            # メインロゴ画像
+            ft.Container(
+                content=ft.Image(
+                    src="/logo/portal_logo.png",
+                    width=600,
+                    height=200,
+                    fit=ft.ImageFit.CONTAIN
+                ),
+                padding=20
+            ),
+            
+            ft.Container(height=10),
+            
+            # サブタイトル
+            ft.Text(
+                "✨ あなたの業務をスマートに管理",
+                size=18,
+                text_align="center",
+                color="#64748b",
+                weight="w400"
+            ),
+        ], horizontal_alignment="center"),
+        padding=ft.padding.symmetric(vertical=40),
+        alignment=ft.alignment.center
+    )
 
-    # 🔍 検索バーのUI定義
-    search_input = ft.TextField(label="検索ワード", width=300)
-    search_button = ft.ElevatedButton("検索", width=100)
+    # 検索バー
+    search_input = ft.TextField(
+        label="何をお探しですか？",
+        width=400,
+        border_radius=25,
+        filled=True,
+        bgcolor="white",
+        border_color="#e2e8f0"
+    )
+    search_button = ft.ElevatedButton(
+        "検索",
+        width=100,
+        style=ft.ButtonStyle(
+            bgcolor="#3b82f6",
+            color="white",
+            shape=ft.RoundedRectangleBorder(radius=20)
+        )
+    )
 
     def on_search_click(e):
         keyword = search_input.value.strip()
@@ -77,48 +119,148 @@ def top_view(page: ft.Page):
 
     search_button.on_click = on_search_click
 
-    search_bar = ft.Row(
-        controls=[search_input, search_button],
-        alignment="center"
+    search_container = ft.Container(
+        content=ft.Row(
+            controls=[search_input, search_button],
+            alignment="center",
+            spacing=15
+        ),
+        padding=20,
+        alignment=ft.alignment.center
     )
 
-    menu_buttons = ft.Column(
-        [
-            ft.ElevatedButton("日報", width=300, on_click=lambda e: page.go("/daily_top")),
-            ft.ElevatedButton("引継", width=300, on_click=lambda e: page.go("/handover_list")),
-            ft.ElevatedButton("マイページ", width=300),
-        ],
-        alignment="center",
-        horizontal_alignment="center",
-        spacing=10,
+    # メニューカード作成関数
+    def create_menu_card(icon, title, subtitle, color, on_click):
+        return ft.Card(
+            content=ft.Container(
+                content=ft.Column([
+                    ft.Icon(icon, size=48, color=color),
+                    ft.Text(title, size=20, weight="bold", color="#1e293b"),
+                    ft.Text(subtitle, size=14, color="#64748b", text_align="center"),
+                ], spacing=15, horizontal_alignment="center"),
+                padding=30,
+                width=280,
+                height=180,
+                on_click=on_click,
+                ink=True
+            ),
+            elevation=4,
+            color="white",
+            surface_tint_color=color
+        )
+
+    # メインメニューカード
+    main_menu = ft.Row([
+        create_menu_card(
+            "assignment", "日報管理", "日々の業務報告を\n効率的に管理", "#10b981",
+            lambda e: page.go("/daily_top")
+        ),
+        create_menu_card(
+            "swap_horiz", "引継管理", "重要な情報を\n確実に引き継ぎ", "#f59e0b",
+            lambda e: page.go("/handover_list")
+        ),
+        create_menu_card(
+            "person", "マイページ", "個人設定と\nプロフィール管理", "#8b5cf6",
+            lambda e: None
+        ),
+    ], alignment="center", spacing=20, wrap=True)
+
+    # クイックアクション
+    quick_actions = ft.Container(
+        content=ft.Column([
+            ft.Text("クイックアクション", size=20, weight="bold", color="#1e293b", text_align="center"),
+            ft.Row([
+                ft.Card(
+                    content=ft.Container(
+                        content=ft.Row([
+                            ft.Icon("add_circle_outline", size=24, color="#3b82f6"),
+                            ft.Text("新規日報", size=16, color="#1e293b")
+                        ], spacing=10),
+                        padding=15,
+                        on_click=lambda e: page.go("/daily/create"),
+                        ink=True
+                    ),
+                    elevation=2,
+                    color="white"
+                ),
+                ft.Card(
+                    content=ft.Container(
+                        content=ft.Row([
+                            ft.Icon("note_add", size=24, color="#10b981"),
+                            ft.Text("新規引継", size=16, color="#1e293b")
+                        ], spacing=10),
+                        padding=15,
+                        on_click=lambda e: page.go("/handover_create"),
+                        ink=True
+                    ),
+                    elevation=2,
+                    color="white"
+                ),
+            ], alignment="center", spacing=15)
+        ], spacing=15, horizontal_alignment="center"),
+        padding=ft.padding.only(top=40),
+        alignment=ft.alignment.center
     )
 
-    account_buttons = ft.Row(
-        [
-            ft.TextButton("新規アカウント作成", on_click=lambda e: page.go("/account_create")),
-            ft.TextButton("アカウント変更", on_click=lambda e: page.go("/account_check")),
-        ],
-        alignment="center"
+    # アカウント管理セクション
+    account_section = ft.Container(
+        content=ft.Card(
+            content=ft.Container(
+                content=ft.Column([
+                    ft.Text("アカウント管理", size=18, weight="bold", color="#1e293b"),
+                    ft.Row([
+                        ft.TextButton(
+                            "新規アカウント作成",
+                            icon="person_add",
+                            on_click=lambda e: page.go("/account_create"),
+                            style=ft.ButtonStyle(color="#3b82f6")
+                        ),
+                        ft.TextButton(
+                            "アカウント変更",
+                            icon="edit",
+                            on_click=lambda e: page.go("/account_check"),
+                            style=ft.ButtonStyle(color="#3b82f6")
+                        ),
+                    ], alignment="center", spacing=20)
+                ], spacing=15, horizontal_alignment="center"),
+                padding=25,
+            ),
+            elevation=2,
+            color="white"
+        ),
+        padding=ft.padding.only(top=30),
+        alignment=ft.alignment.center
     )
 
-    admin_button = ft.Container(
-        ft.TextButton("管理者メニュー", on_click=lambda e: show_admin_login_dialog(page)),
-        alignment=ft.alignment.center,
-        padding=10
+    # 管理者メニュー
+    admin_section = ft.Container(
+        content=ft.TextButton(
+            "管理者メニュー",
+            icon="admin_panel_settings",
+            on_click=lambda e: show_admin_login_dialog(page),
+            style=ft.ButtonStyle(
+                color="#ef4444",
+                bgcolor="#fef2f2",
+                shape=ft.RoundedRectangleBorder(radius=15)
+            )
+        ),
+        padding=ft.padding.only(top=20),
+        alignment=ft.alignment.center
     )
 
-    return ft.Column(
-        controls=[
-            title,
-            search_bar,  # ← タイトル下に検索バー追加
-            ft.Divider(),
-            menu_buttons,
-            ft.Divider(),
-            account_buttons,
-            ft.Divider(),
-            admin_button
-        ],
-        horizontal_alignment="center",
-        alignment="start",
-        spacing=30
+    return ft.Container(
+        content=ft.Column(
+            controls=[
+                header,
+                search_container,
+                main_menu,
+                quick_actions,
+                account_section,
+                admin_section
+            ],
+            horizontal_alignment="center",
+            spacing=0
+        ),
+        bgcolor="#f8fafc",
+        expand=True
     )
