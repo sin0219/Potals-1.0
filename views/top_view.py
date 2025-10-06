@@ -319,7 +319,8 @@ def top_view(page: ft.Page):
                 admin_section
             ],
             horizontal_alignment="center",
-            spacing=0
+            spacing=0,
+            scroll="auto"
         ),
         bgcolor="#f8fafc",
         expand=True
