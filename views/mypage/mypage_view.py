@@ -99,7 +99,7 @@ def mypage_view(page: ft.Page):
                                     ], spacing=5),
                                 ], spacing=8),
                                 padding=15,
-                                on_click=lambda e, r=rowid: page.go(f"/daily/detail?id={r}")
+                                on_click=lambda e, r=rowid: page.go(f"/daily/detail?id={r}&from=/mypage")
                             ),
                             elevation=2
                         )
@@ -144,7 +144,7 @@ def mypage_view(page: ft.Page):
                                     ], spacing=5),
                                 ], spacing=8),
                                 padding=15,
-                                on_click=lambda e, h=hid: page.go(f"/handover_detail/{h}")
+                                on_click=lambda e, h=hid: page.go(f"/handover_detail/{h}?from=/mypage")
                             ),
                             elevation=2
                         )

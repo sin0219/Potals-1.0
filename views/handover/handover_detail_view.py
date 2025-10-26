@@ -5,10 +5,13 @@ import os
 import subprocess
 import tempfile
 import db
-
+from urllib.parse import parse_qs, urlparse
 
 def handover_detail_view(page: ft.Page):
-    handover_id = int(page.route.split("/")[-1])
+    url_parts = urlparse(page.route)
+    handover_id = int(url_parts.path.split("/")[-1])
+    query_params = parse_qs(url_parts.query)
+    return_to = query_params.get('from', ['/handover_list'])[0]
 
     # データ取得
     conn = sqlite3.connect("data/portal.db")
@@ -106,7 +109,7 @@ def handover_detail_view(page: ft.Page):
 
             page.close(dlg_modal)
             await asyncio.sleep(0.1)
-            page.go("/handover_list")
+            page.go(return_to)
         else:
             error_text.value = "認証に失敗しました"
             page.update()
@@ -150,7 +153,7 @@ def handover_detail_view(page: ft.Page):
 
             page.close(dlg_modal)
             await asyncio.sleep(0.1)
-            page.go("/handover_list")
+            page.go(return_to)
         else:
             conn.close()
             error_text.value = "認証に失敗しました"
@@ -250,7 +253,7 @@ def handover_detail_view(page: ft.Page):
                 ft.Divider(),
                 ft.Row(
                     [
-                        ft.TextButton(text="戻る", icon="arrow_back", on_click=lambda e: page.go("/handover_list")),
+                        ft.TextButton(text="戻る", icon="arrow_back", on_click=lambda e: page.go(return_to)),
                         ft.ElevatedButton(text="認証する", icon="check", on_click=open_approve_dialog),
                         ft.IconButton(icon="edit", tooltip="編集", on_click=open_edit_dialog),
                         ft.IconButton(icon="delete", tooltip="削除", icon_color="gray", on_click=open_delete_dialog),

@@ -19,6 +19,9 @@ def daily_detail_view(page: ft.Page):
     
     daily_id = int(query_params['id'][0])
 
+    # ★ この行を追加 ★
+    return_to = query_params.get('from', ['/daily'])[0]  # デフォルトは /daily
+
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
@@ -75,7 +78,7 @@ def daily_detail_view(page: ft.Page):
 
             page.close(dlg_modal)
             await asyncio.sleep(0.1)
-            page.go("/daily")
+            page.go(return_to)
         else:
             error_text.value = "認証に失敗しました（管理者権限が必要）"
             page.update()
@@ -118,7 +121,7 @@ def daily_detail_view(page: ft.Page):
 
             page.close(dlg_modal)
             await asyncio.sleep(0.1)
-            page.go("/daily")
+            page.go(return_to)
         else:
             conn.close()
             error_text.value = "認証に失敗しました"
@@ -224,7 +227,7 @@ def daily_detail_view(page: ft.Page):
                 ft.Divider(),
                 ft.Row(
                     [
-                        ft.TextButton(text="戻る", icon="arrow_back", on_click=lambda e: page.go("/daily")),
+                        ft.TextButton(text="戻る", icon="arrow_back", on_click=lambda e: page.go(return_to)),
                         ft.ElevatedButton(text="認証する", icon="check", on_click=open_approve_dialog),
                         ft.IconButton(icon="edit", tooltip="編集", on_click=open_edit_dialog),
                         ft.IconButton(icon="delete", tooltip="削除", icon_color="gray", on_click=open_delete_dialog),
